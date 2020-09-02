@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Interactive Graphics Project</title>
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="css/index.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+	</head>
+	<body>
+		<div style="height: 100px; position: absolute; z-index: +10;">
+			<div> <b id = "punteggio">Punteggio</b> : <p id="score"></p> </div>
+		</div>
+    </body>
+    <body style="background-image:url(textures/sfondo.jpeg);" >
+        <script src="build/three.min.js"></script>
+        <script src="js/index.js" type="module"></script>
+        <div id="container">
+				<div id="menu" style="position: absolute; top: 40%; left: 35%">
+					<span id="start" class='start-btn'>START</span>
+					<span id="start2" class='start-btn'>START2</span>
+				</div>
+				<!-- The Modal -->
+				<div id="myModal" class="modal">
+				  <!-- Modal content -->
+				  <div class="modal-content">
+				    <span class="close">&times;</span>
+				    <div id = "stats"></div>
+				    <button id = "button">Restart</button>
+				  </div>
+				</div>
+		</div>
+	</body>
+</html>

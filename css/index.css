@@ -1,0 +1,95 @@
+body {
+	margin: 0;
+	background-color: #000;
+	color: #fff;
+	font-family: Monospace;
+	font-size: 13px;
+	line-height: 24px;
+	overscroll-behavior: none;
+}
+
+canvas {
+	display: block;
+}
+
+#score{
+	margin-left: 10px;
+	font-size: 20px;
+
+}
+
+#punteggio{
+	margin-left: 10px;
+	font-size: 25px;
+
+
+}
+
+.start-btn{
+	text-align: center;
+	display: inline-block;
+	margin:5px;
+	font-weight: bold;
+	font-size: 30pt;
+	padding: 10px 10px 10px 10px ;
+	background-color: gray;
+	text-shadow: -1px -1px black, 1px 1px ;
+	color: rgb(0, 0, 0);
+	-webkit-border-radius: 7px;
+	-moz-border-radius: 7px;
+	-o-border-radius: 7px;
+	border-radius: 7px;
+	box-shadow: 0 .2em gray;
+}
+
+ .start-btn:active {
+	box-shadow: none;
+	position: relative;
+	top: .2em;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+body {
+	background-color: #cce0ff;
+	color: #000;
+}
+a {
+	color: #080;
+}
