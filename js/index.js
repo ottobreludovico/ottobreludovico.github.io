@@ -45,6 +45,8 @@ function init() {
     container.setAttribute("id", "scena");
 
     document.body.appendChild( container );
+	
+    document.body.style.cursor=crosshair;
 
     createScene();
 
