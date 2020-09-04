@@ -1,4 +1,4 @@
- import { OBJLoader } from '../jsm/loaders/OBJLoader.js';
+import { OBJLoader } from '../jsm/loaders/OBJLoader.js';
 import {MTLLoader} from '../jsm/loaders/MTLLoader.js';
 import { FBXLoader } from '../jsm/loaders/FBXLoader.js';
 
