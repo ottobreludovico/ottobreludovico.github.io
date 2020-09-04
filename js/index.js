@@ -1,9 +1,12 @@
  import { OBJLoader } from '../jsm/loaders/OBJLoader.js';
 import {MTLLoader} from '../jsm/loaders/MTLLoader.js';
+import { FBXLoader } from '../jsm/loaders/FBXLoader.js';
+
 
 var container;
 var camera, scene, renderer;
 var gun;
+var gun1;
 var t=[];
 var tm=[];
 var sound_shot;
@@ -28,6 +31,7 @@ var bordo;
 var centro;
 var accuratezza;
 var sound_target;
+var num_colpi;
 
 function init() {
     punteggio=0;
@@ -74,6 +78,8 @@ function init() {
 function init2() {
     punteggio=0;
 
+    num_colpi = 0;
+
     container = document.createElement( 'div' );
 
     document.body.appendChild( container );
@@ -82,7 +88,7 @@ function init2() {
 
     createStar(0,0);
 
-    createGun();
+    createStarGun();
 
     createRenderer();
 
@@ -290,10 +296,16 @@ function createGround(){
 function onMouseMove(evt) {
     evt.preventDefault();
     mouse.x = ( evt.clientX / window.innerWidth ) * 2 - 1;
-	mouse.y = - ( evt.clientY / window.innerHeight ) * 2 + 1;	
-    gun.rotation.y=(window.innerWidth/2-evt.clientX)/1500;
-    gun.rotation.x=0.002+(window.innerHeight/2-evt.clientY)/1000;
+    mouse.y = - ( evt.clientY / window.innerHeight ) * 2 + 1;	
+    if(game1){
+        gun.rotation.y=(window.innerWidth/2-evt.clientX)/1500;
+        gun.rotation.x=0.002+(window.innerHeight/2-evt.clientY)/1000;
+    }else if(game2){
+        gun1.rotation.y=4.7+(window.innerWidth/2-evt.clientX)/1500;
+        gun1.rotation.x=(window.innerHeight/2-evt.clientY)/1000;
+    }
 }
+
 
 function createShotMusic(){
     // create an AudioListener and add it to the camera
@@ -304,6 +316,22 @@ function createShotMusic(){
 	// load a sound and set it as the Audio object's buffer
 	var audioLoader = new THREE.AudioLoader();
 	audioLoader.load('sounds/shot.mp3', function(buffer) {
+		sound_shot.setBuffer(buffer);
+        sound_shot.setVolume(0.08);
+        sound_shot.setLoop( false );
+	    sound_shot.play();
+		});
+}
+
+function createStarShotMusic(){
+    // create an AudioListener and add it to the camera
+	var listener = new THREE.AudioListener();
+	camera.add(listener);
+	// create a global audio source
+	sound_shot = new THREE.Audio(listener);
+	// load a sound and set it as the Audio object's buffer
+	var audioLoader = new THREE.AudioLoader();
+	audioLoader.load('sounds/starShot.mp3', function(buffer) {
 		sound_shot.setBuffer(buffer);
         sound_shot.setVolume(0.08);
         sound_shot.setLoop( false );
@@ -344,13 +372,13 @@ function createTargetMusic(){
 }
 
 function fire(){
-    scene.remove(tex);
-    createShotMusic();
-    k=true;
-    var raycaster = new THREE.Raycaster();	
-    raycaster.setFromCamera(mouse,camera);
-    var intersects = raycaster.intersectObjects( scene.children, true);
     if(game1){
+        scene.remove(tex);
+        createShotMusic();
+        k=true;
+        var raycaster = new THREE.Raycaster();	
+        raycaster.setFromCamera(mouse,camera);
+        var intersects = raycaster.intersectObjects( scene.children, true);
     	caricatore += 1;
         if( intersects.length > 0 ) {
             console.log(intersects[0]);
@@ -374,6 +402,12 @@ function fire(){
             respawn();
         }
     }else if(game2){
+        scene.remove(tex);
+        createStarShotMusic();
+        var raycaster = new THREE.Raycaster();	
+        raycaster.setFromCamera(mouse,camera);
+        var intersects = raycaster.intersectObjects( scene.children, true);
+        num_colpi += 1;
         if( intersects.length > 0 ) {
             punteggio+=1;
             updateHTML(punteggio);
@@ -449,11 +483,13 @@ function respawn(){
 
 		// When the user clicks on <span> (x), close the modal
 		span.onclick = function() {
+            game1=false;
 		  	modal.style.display = "none";
 		  	location.reload(true);
 		}
 
         butt.onclick = function() {
+            game1=false;
             modal.style.display = "none";
             location.reload(true);            
         }
@@ -474,6 +510,43 @@ function respawn(){
 
 function respawnStar(){
     del(stars);
+    if(clock.getElapsedTime() >= 10){
+
+  		var modal = document.getElementById("myModal");
+		// Get the <span> element that closes the modal
+		var span = document.getElementsByClassName("close")[0];
+
+        var butt = document.getElementById("button");
+
+        var c = "<p>Tempo:";
+
+        var q = "</p><p>Punteggio:";
+
+        var w = "</p><p>Num Colpi:"
+
+        var d = "</p>";
+
+        document.getElementById("stats").innerHTML = c.concat(String(clock.getElapsedTime()), q, String(punteggio), w, num_colpi, d);
+		
+		modal.style.display = "block";
+
+		// When the user clicks on <span> (x), close the modal
+		span.onclick = function() {
+            game2=false;
+		  	modal.style.display = "none";
+		  	location.reload(true);
+		}
+
+        butt.onclick = function() {
+            game2=false;
+            modal.style.display = "none";
+            location.reload(true);            
+        }
+
+    	return;
+
+  	
+    }
     if((Math.floor(Math.random() * 4) + 1) == 1){
         createStar((Math.random() * 400), (Math.random() * 300));
     }else if((Math.floor(Math.random() * 4) + 1) == 2){
@@ -581,6 +654,8 @@ function render() {
 document.getElementById("start").addEventListener("click", function(){
     document.getElementById("start").style.display = "none";
     document.getElementById("start2").style.display = "none";
+    document.getElementById("start3").style.display = "none";
+    document.getElementById("prova").style.display = "block";
     game1=true;
     init();
     animate();
@@ -589,8 +664,36 @@ document.getElementById("start").addEventListener("click", function(){
 document.getElementById("start2").addEventListener("click", function(){
     document.getElementById("start2").style.display = "none";
     document.getElementById("start").style.display = "none";
+    document.getElementById("start3").style.display = "none";
+    document.getElementById("prova").style.display = "block";
+    document.getElementById("prova").style.color = "white";
+    document.getElementById("score").style.color = "white";
     game2=true;
     init2();
     animate();
 });
 
+function createStarGun(){
+    var loader = new FBXLoader();
+            loader.load( 'models/space-gun/source/Spacegun_LP.fbx', function ( obj1 ) {
+                gun1=obj1;
+                obj1.name="gun1";
+                obj1.position.x=0;
+                obj1.position.y=0;
+                obj1.position.z=-280.000;
+
+                obj1.rotation.x=0;
+                obj1.rotation.y=4.7;
+                obj1.rotation.z=0;
+                obj1.traverse( function ( child ) {
+                    if ( child.isMesh ) {
+                        child.material.Map = new THREE.TextureLoader().load('models/space-gun/textures/Spacegun_LP_01_-_Default_BaseColor.png');
+                        //child.castShadow = true;
+                        //child.receiveShadow = false;
+                        //child.flatshading = true;
+                    }
+                } );
+
+                scene.add( obj1 );
+            } );
+}

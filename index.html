@@ -10,16 +10,20 @@
 	</head>
 	<body>
 		<div style="height: 100px; position: absolute; z-index: +10;">
-			<div> <b id = "punteggio">Punteggio</b> : <p id="score"></p> </div>
+			<div> 
+				<span id = "prova" style="display: none;"><b id = "punteggio"> Punteggio: </b></span> 
+				<b><p id = "score"> </p> </b>
+			</div>
 		</div>
     </body>
-    <body style="background-image:url(textures/sfondo.jpeg);" >
+    <body style="background-color: lightgray" >
         <script src="build/three.min.js"></script>
         <script src="js/index.js" type="module"></script>
         <div id="container">
-				<div id="menu" style="position: absolute; top: 40%; left: 35%">
-					<span id="start" class='start-btn'>START</span>
-					<span id="start2" class='start-btn'>START2</span>
+				<div id="menu" style="position: absolute; top: 10%; left: 8%">
+					<span id="start" class='start-btn' style = "background-image: url(textures/sfondo.jpeg); background-repeat: no-repeat; background-size: cover; background-position: center;"></span>
+					<span id="start2" class='start-btn' style = "background-image: url(textures/star.jpg); background-repeat: no-repeat; background-size: cover; background-position: center;"></span>
+					<span id="start3" class='start-btn' style = "background-image: url(textures/lux.jpeg); background-repeat: no-repeat; background-size: cover; background-position: center;"></span>
 				</div>
 				<!-- The Modal -->
 				<div id="myModal" class="modal">
