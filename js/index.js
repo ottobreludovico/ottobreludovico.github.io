@@ -894,7 +894,7 @@ function check(){
 
 function respawnStar(){
     del(stars);
-    if(clock.getElapsedTime() >= 10){
+    if(clock.getElapsedTime() >= 20){
 
   		var modal = document.getElementById("myModal");
 		// Get the <span> element that closes the modal
@@ -902,7 +902,7 @@ function respawnStar(){
 
         var butt = document.getElementById("button");
 
-        var c = "<p>Time:";
+        var c = "<p>Time: 20s";
 
         var q = "</p><p>Score:";
 
@@ -910,7 +910,7 @@ function respawnStar(){
 
         var d = "</p>";
 
-        document.getElementById("stats").innerHTML = c.concat(String(clock.getElapsedTime()), q, String(punteggio), w, num_colpi, d);
+        document.getElementById("stats").innerHTML = c.concat(q, String(punteggio), w, num_colpi, d);
 		
 		modal.style.display = "block";
 
@@ -1143,6 +1143,8 @@ document.getElementById("start").addEventListener("click", function(){
     document.getElementById("start2").style.display = "none";
     document.getElementById("start3").style.display = "none";
     document.getElementById("prova").style.display = "block";
+    document.getElementById("prova").style.color = "white";
+    document.getElementById("score").style.color = "white";
     document.getElementById("prova1").style.display = "block";
     document.getElementById("instruction").style.display = "none";    
     game1=true;
@@ -1163,17 +1165,6 @@ document.getElementById("start2").addEventListener("click", function(){
     animate();
 });
 
-document.getElementById("start3").addEventListener("click", function(){
-    document.getElementById("start2").style.display = "none";
-    document.getElementById("start").style.display = "none";
-    document.getElementById("start3").style.display = "none";
-    document.getElementById("prova").style.display = "block";
-    document.getElementById("prova").style.color = "white";
-    document.getElementById("score").style.color = "white";
-    document.getElementById("instruction").style.display = "none";    
-    "instruction"
-    game3=true;
-});
 
 function createStarGun(){
     var loader = new FBXLoader();

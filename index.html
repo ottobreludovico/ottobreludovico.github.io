@@ -41,7 +41,7 @@
 			  <div class="modal-content" id = "back">
 				<span class="close">&times;</span>
 				<div id = "stats"></div>
-				<button id = "button">Restart</button>
+				<button id = "button">Go Home</button>
 				<button id = "n_level" style = "display: none;">Next Level</button>
 			  </div>
 			</div>
@@ -62,9 +62,12 @@
 			Physijs.scripts.ammo = '/ammo.js';
 			
 			var controls, container, initScene, render, applyForce, setMousePosition, mouse_position, ground_material, box_material, loader,
-			renderer, render_stats, physics_stats, scene, ground, light, camera, box, boxes = [], ball,k=false, s=false, count;
+			renderer, render_stats, physics_stats, scene, ground, light, camera, box, boxes = [], ball,k=false, s=false, count, sound_app, sound_cammino, sound_tiro, sound_strike;
+			var tiro=true;
+			var retry;
+			var home;
 	
-			initScene = function() {
+			function initScene() {
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
@@ -100,9 +103,8 @@
 				count=0;
 
 				var aspect = window.innerWidth / window.innerHeight;
-				var d = 400;
+				
 				//camera = new THREE.OrthographicCamera( - d * aspect, d * aspect, d, - d, 1, 2500 );
-
 				camera = new THREE.PerspectiveCamera( 50, aspect, 1, 3000 );
 				//var camera = new THREE.OrthographicCamera( 1000 / -2, 1000 / 2, 800 / 2, 800 / -2, 1, 1000 );
 				camera.position.set( 0, 250, -200 );
@@ -115,8 +117,8 @@
 				// Light
 				scene.add( new THREE.AmbientLight( 0x666666 ) );
 
-				light = new THREE.DirectionalLight( 0xdfebff, 1 );
-				light.position.set( 50, 200, 200 );
+				light = new THREE.DirectionalLight( 0xffffff, 1 );
+				light.position.set( 0, 200, 0 );
 				light.position.multiplyScalar( 1.3 );
 
 				light.castShadow = true;
@@ -124,7 +126,7 @@
 				light.shadow.mapSize.width = 1024;
 				light.shadow.mapSize.height = 1024;
 
-				var d = 300;
+				var d = 600;
 
 				light.shadow.camera.left = - d;
 				light.shadow.camera.right = d;
@@ -133,64 +135,11 @@
 
 				light.shadow.camera.far = 1000;
 
-    			scene.add( light );
+				scene.add( light );
+
 
 				// Loader
 				loader = new THREE.TextureLoader();
-				
-				// Materials
-				/*var material = new THREE.MeshBasicMaterial( {color: 0xcccccc, side: THREE.FrontSide} );
-				
-				ground_material = Physijs.createMaterial(
-					new THREE.MeshLambertMaterial({ map: loader.load( '/rocks.jpg' ) }),
-					.8, // high friction
-					.4 // low restitution
-				);
-				ground_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
-				ground_material.map.repeat.set( 3, 3 );
-				
-				box_material = Physijs.createMaterial(
-					new THREE.MeshLambertMaterial({ map: loader.load( '/plywood.jpg' ) }),
-					.4, // low friction
-					.6 // high restitution
-				);
-				box_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
-				box_material.map.repeat.set( .25, .25 );
-				
-				// Ground
-				ground = new Physijs.BoxMesh(
-					new THREE.BoxGeometry(1000, 1, 1000),
-					ground_material,
-					0 // mass
-				);
-				ground.receiveShadow = true;
-				scene.add( ground );
-				
-				for ( var i = 0; i < 10; i++ ) {
-					box = new Physijs.BoxMesh(
-						new THREE.BoxGeometry( 4, 4, 4 ),
-						box_material
-					);
-					box.position.set(
-						Math.random() * 50 - 25,
-						10 + Math.random() * 5,
-						150 + Math.random() * 50 - 25
-					);
-					box.rotation.set(
-						Math.random() * Math.PI * 2,
-						Math.random() * Math.PI * 2,
-						Math.random() * Math.PI * 2
-					);
-					box.scale.set(
-						Math.random() * 1 + .5,
-						Math.random() * 1 + .5,
-						Math.random() * 1 + .5
-					);
-					box.castShadow = true;
-					scene.add( box );
-					boxes.push( box );
-				}
-				*/
 
 				(function(){
 
@@ -206,6 +155,7 @@
 					plane.position.y = 0;
 					plane.position.x = 0;
 					plane.receiveShadow = true;
+					plane.castShadow = true;
 					ground = plane;
 					scene.add(plane);
 					
@@ -247,83 +197,11 @@
 
 					scene.add(makeScore(0, -1400, 350, 10));
 					
-
-
-
-					// Boxes
-					var boxColor = 0xe6f2e5,
-						numberOfBoxes = 6,
-						boxWidth = 20,
-						boxHeight = 40,
-						boxDepth = 20,
-						offsetX = 0,
-						offsetZ = -900;
-
-						var textureLoader = new THREE.TextureLoader();
-
-						var texture00 = textureLoader.load( 'textures/pin.png' );
-
-
-						var materials = [
-							new THREE.MeshBasicMaterial( { map: texture00 } ),
-							new THREE.MeshBasicMaterial( { map: texture00 } ),
-							new THREE.MeshBasicMaterial( { color: 0xffffff} ),
-							new THREE.MeshBasicMaterial( { color: 0xffffff } ),
-							new THREE.MeshBasicMaterial( { map: texture00 } ),
-							new THREE.MeshBasicMaterial( { map: texture00 } )
-						];
-						var faceMaterial = new THREE.MeshFaceMaterial( materials );
-						var boxGeometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-						var boxMesh = new THREE.Mesh( boxGeometry, faceMaterial );
-
-				
-
-					for(var i = 0; i < numberOfBoxes; i++) {
-						var box = new Physijs.BoxMesh(boxGeometry, faceMaterial, 15);
-						//box.castShadow = true;
-						//box.receiveShadow = true;
-						//box.position.set(0,boxHeight*i+(boxHeight/2), 0);
-						boxes.push(box);
-					};
-
-					boxes[0].position.set(0 + offsetX,boxHeight/2,offsetZ);
-					boxes[1].position.set(-30 + offsetX,boxHeight/2,offsetZ);
-					boxes[2].position.set(30 + offsetX,boxHeight/2,offsetZ);
-					boxes[3].position.set(-15 + offsetX,boxHeight/2+boxHeight,offsetZ);
-					boxes[4].position.set(15 + offsetX,boxHeight/2+boxHeight,offsetZ);
-					boxes[5].position.set(0 + offsetX,boxHeight/2+(2*boxHeight),offsetZ);
-
-					boxes[0].addEventListener('collision', function(object){
-						//console.log(object);
-						if(object.name=="ball"){
-							if(s==false){
-								s=true;
-							}
-						}
-					});
-
-					boxes.forEach(function(box){
-						//console.log(box.rotation);
-						scene.add(box);
-					});
+					createBoxes();
 
 					})();
 
-					ball = null;
-					var ballGeo = new THREE.SphereGeometry(15, 24, 24);
-					var tex=new THREE.TextureLoader().load('textures/ball1.png');
-					var ballMat = Physijs.createMaterial(new THREE.MeshBasicMaterial({side: THREE.FrontSide, map: tex}), 1, 1);
-					ball = new Physijs.SphereMesh(
-					ballGeo,
-					ballMat,
-					10
-					);
-
-					ball.position.set(0, 20, 750);
-					ball.setLinearFactor(new THREE.Vector3( 0, 0, 0 )); // only move on X and Z axis
-					ball.castShadow = true;
-					ball.name="ball";
-					scene.add(ball);
+					createBall();
 
 				(function() {
 
@@ -369,41 +247,60 @@
 					};
 
 					var mouseDownHandler = function(event) {
-						var intersects = getIntersectFromMouse(event, ball);
-						if (intersects[0]) {
-							//orbitControls.enabled = false;
-							renderer.domElement.addEventListener( 'mousemove', mouseMoveHandler );
-							//container.on('mousemove', mouseMoveHandler);
-							renderer.domElement.addEventListener( 'mouseup', mouseUpHandler );
-							//container.on('mouseup', mouseUpHandler);
+						if(tiro){
+							var intersects = getIntersectFromMouse(event, ball);
+							if (intersects[0]) {
+								//orbitControls.enabled = false;
+								renderer.domElement.addEventListener( 'mousemove', mouseMoveHandler );
+								//container.on('mousemove', mouseMoveHandler);
+								renderer.domElement.addEventListener( 'mouseup', mouseUpHandler );
+								//container.on('mouseup', mouseUpHandler);
+							}
+						}else{
+							var intersects = getIntersectFromMouse(event, retry);
+							var intersects1 = getIntersectFromMouse(event, home);
+							if (intersects[0]){
+								retryy();
+							}
+							if (intersects1[0]){
+								location.reload();
+							}
 						}
 					};
 
 					var mouseMoveHandler = function(event) {
-						var intersects = getIntersectFromMouse(event, ground);
-						if (intersects[0]) {
-							powerPoint = intersects[0].point;
-							powerPoint.y = powerPoint.y + ball.geometry.parameters.radius;
-							changePowerLine();
-							powerLine.visible = true;
+						if(tiro){
+							var intersects = getIntersectFromMouse(event, ground);
+							if (intersects[0]) {
+								powerPoint = intersects[0].point;
+								powerPoint.y = powerPoint.y + ball.geometry.parameters.radius;
+								changePowerLine();
+								powerLine.visible = true;
+							}
 						}
 					};
 
 					var mouseUpHandler = function(event) {
-						//container.off('mousemove', mouseMoveHandler);
-						renderer.domElement.removeEventListener( 'mousemove', mouseMoveHandler );
-						//container.off('mouseup', mouseUpHandler);
-						renderer.domElement.removeEventListener( 'mouseup', mouseUpHandler );
-						powerLine.visible = false;
-						//orbitControls.enabled = true;
-						k=true;
-						setTimeout(check,10000);
-						var vector = powerPoint.sub(ball.position);
-						ball.applyCentralImpulse(vector.negate().multiplyScalar(impulseScalar));
+						if(tiro){
+							//container.off('mousemove', mouseMoveHandler);
+							renderer.domElement.removeEventListener( 'mousemove', mouseMoveHandler );
+							//container.off('mouseup', mouseUpHandler);
+							renderer.domElement.removeEventListener( 'mouseup', mouseUpHandler );
+							powerLine.visible = false;
+							//orbitControls.enabled = true;
+							k=true;
+							tiro=false
+							tiro_Sound();
+							cammino_Sound();
+							setTimeout(check,10000);
+							var vector = powerPoint.sub(ball.position);
+							ball.applyCentralImpulse(vector.negate().multiplyScalar(impulseScalar));
+						}
 					};
 
 					//container.on('mousedown', mouseDownHandler);
 					renderer.domElement.addEventListener( 'mousedown', mouseDownHandler );
+					
 
 					var drawPowerLine = function(){
 						if(powerLine.visible){
@@ -458,24 +355,51 @@
 
 			function strike(){
 				if(s){
-					var loader = new THREE.FontLoader();
+					ritira();
+					homee();
+				}
+			}
+
+			function ritira(){
+				var loader = new THREE.FontLoader();
 					loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
-							var geometry = new THREE.TextGeometry( "DAJE", {
+							var geometry = new THREE.TextGeometry( "Retry", {
 								font: font,
-								size: 70,
-								height: 70,
+								size: 60,
+								height: 60,
 								bevelSize: 8,
 								curveSegments: 12
 							});
 						var material = new THREE.MeshNormalMaterial();
-						var mesh = new THREE.Mesh( geometry, material );
-						mesh.position.x=-75;
-						mesh.position.y=80;
-						mesh.position.z=-1600;
+						retry = new THREE.Mesh( geometry, material );
+
+						retry.position.x=875;
+						retry.position.y=480;
+						retry.position.z=-1600;
 					
-						scene.add(mesh);
+						scene.add(retry);
 					});
-				}
+			}
+
+			function homee(){
+				var loader = new THREE.FontLoader();
+					loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
+							var geometry = new THREE.TextGeometry( "Home", {
+								font: font,
+								size: 60,
+								height: 60,
+								bevelSize: 8,
+								curveSegments: 12
+							});
+						var material = new THREE.MeshNormalMaterial();
+						home = new THREE.Mesh( geometry, material );
+
+						home.position.x=875;
+						home.position.y=400;
+						home.position.z=-1600;
+					
+						scene.add(home);
+					});
 			}
 
 			function check(){
@@ -494,18 +418,176 @@
 			}
 
 
+			function strikeSound(){
+    			// create an AudioListener and add it to the camera
+    			var listener = new THREE.AudioListener();
+			    camera.add(listener);
+			    // create a global audio source
+			    sound_app = new THREE.Audio(listener);
+			    // load a sound and set it as the Audio object's buffer
+			    var audioLoader = new THREE.AudioLoader();
+			    audioLoader.load('sounds/applausi.mp3', function(buffer) {
+			        sound_app.setBuffer(buffer);
+			        sound_app.setVolume(0.4);
+			        sound_app.setLoop( false );
+			        sound_app.play();
+			        });    
+			}
+
+			function cammino_Sound(){
+    			// create an AudioListener and add it to the camera
+    			var listener = new THREE.AudioListener();
+			    camera.add(listener);
+			    // create a global audio source
+			    sound_cammino = new THREE.Audio(listener);
+			    // load a sound and set it as the Audio object's buffer
+			    var audioLoader = new THREE.AudioLoader();
+			    audioLoader.load('sounds/cammino.mp3', function(buffer) {
+			        sound_cammino.setBuffer(buffer);
+			        sound_cammino.setVolume(0.4);
+			        sound_cammino.setLoop( true );
+			        sound_cammino.play();
+			        });    
+			}
+
+			function tiro_Sound(){
+    			// create an AudioListener and add it to the camera
+    			var listener = new THREE.AudioListener();
+			    camera.add(listener);
+			    // create a global audio source
+			    sound_tiro = new THREE.Audio(listener);
+			    // load a sound and set it as the Audio object's buffer
+			    var audioLoader = new THREE.AudioLoader();
+			    audioLoader.load('sounds/tiro.mp3', function(buffer) {
+			        sound_tiro.setBuffer(buffer);
+			        sound_tiro.setVolume(0.4);
+			        sound_tiro.setLoop( false );
+			        sound_tiro.play();
+			        });    
+			}
 			
-			/*
-			onclick = function(evt){
-    			var force = new THREE.Vector3(0, 10, 200);
-    			ball.applyCentralImpulse(force);
-			}*/
+			function strike_Sound(){
+    			// create an AudioListener and add it to the camera
+    			var listener = new THREE.AudioListener();
+			    camera.add(listener);
+			    // create a global audio source
+			    sound_strike = new THREE.Audio(listener);
+			    // load a sound and set it as the Audio object's buffer
+			    var audioLoader = new THREE.AudioLoader();
+			    audioLoader.load('sounds/strike.mp3', function(buffer) {
+			        sound_strike.setBuffer(buffer);
+			        sound_strike.setVolume(0.4);
+			        sound_strike.setLoop( false );
+			        sound_strike.play();
+			        });    
+			}
+
+			function retryy(){
+				s=false;
+				for(var i = 0; i < 6; i++) {
+					scene.remove(boxes[i]);
+				}
+				boxes=[];
+				
+				scene.remove(ball);
+				scene.remove(retry);
+				scene.remove(home);
+				createBall();
+				createBoxes();
+				tiro=true;
+			}
+
+			function createBoxes(){
+					// Boxes
+					var boxColor = 0xe6f2e5,
+						numberOfBoxes = 6,
+						boxWidth = 20,
+						boxHeight = 40,
+						boxDepth = 20,
+						offsetX = 0,
+						offsetZ = -900;
+
+						var textureLoader = new THREE.TextureLoader();
+
+						var texture00 = textureLoader.load( 'textures/pin.png' );
+
+
+						var materials = [
+							new THREE.MeshBasicMaterial( { map: texture00 } ),
+							new THREE.MeshBasicMaterial( { map: texture00 } ),
+							new THREE.MeshBasicMaterial( { color: 0xffffff} ),
+							new THREE.MeshBasicMaterial( { color: 0xffffff } ),
+							new THREE.MeshBasicMaterial( { map: texture00 } ),
+							new THREE.MeshBasicMaterial( { map: texture00 } )
+						];
+						var faceMaterial = new THREE.MeshFaceMaterial( materials );
+						var boxGeometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+						var boxMesh = new THREE.Mesh( boxGeometry, faceMaterial );
+
+				
+
+					for(var i = 0; i < numberOfBoxes; i++) {
+						var box = new Physijs.BoxMesh(boxGeometry, faceMaterial, 10);
+						box.castShadow = true;
+						box.receiveShadow = true;
+						//box.position.set(0,boxHeight*i+(boxHeight/2), 0);
+						boxes.push(box);
+					};
+
+					boxes[0].position.set(0 + offsetX,boxHeight/2,offsetZ);
+					boxes[1].position.set(-30 + offsetX,boxHeight/2,offsetZ);
+					boxes[2].position.set(30 + offsetX,boxHeight/2,offsetZ);
+					boxes[3].position.set(-15 + offsetX,boxHeight/2+boxHeight,offsetZ);
+					boxes[4].position.set(15 + offsetX,boxHeight/2+boxHeight,offsetZ);
+					boxes[5].position.set(0 + offsetX,boxHeight/2+(2*boxHeight),offsetZ);
+
+					boxes[0].addEventListener('collision', function(object){
+						//console.log(object);
+						if(object.name=="ball"){
+							if(s==false){
+								s=true;
+								sound_cammino.pause();
+								strikeSound();
+								strike_Sound();
+							}
+						}
+					});
+
+					boxes.forEach(function(box){
+						//console.log(box.rotation);
+						scene.add(box);
+					});
+			}
+
+			function createBall(){
+				var ballGeo = new THREE.SphereGeometry(15, 24, 24);
+				var tex=new THREE.TextureLoader().load('textures/ball1.png');
+				var ballMat = Physijs.createMaterial(new THREE.MeshBasicMaterial({side: THREE.FrontSide, map: tex}), 1, 1);
+				ball = new Physijs.SphereMesh(
+				ballGeo,
+				ballMat,
+				10
+				);
+
+				ball.position.set(0, 20, 750);
+				ball.setLinearFactor(new THREE.Vector3( 0, 0, 0 )); // only move on X and Z axis
+				ball.castShadow = true;
+				ball.receiveShadow = true;
+				ball.name="ball";
+				scene.add(ball);
+			}
+
+
+			document.getElementById("start3").addEventListener("click", function(){
+				document.getElementById("start2").style.display = "none";
+				document.getElementById("start").style.display = "none";
+				document.getElementById("start3").style.display = "none";
+				document.getElementById("prova").style.display = "none";
+				document.getElementById("instruction").style.display = "none";    
+				initScene();
+			});
 
 			
-
-			
-			
-			document.getElementById("start3").onclick = initScene;
 			
 		</script>
 
