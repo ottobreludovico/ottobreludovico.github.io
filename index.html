@@ -96,7 +96,6 @@
 						scene.simulate( undefined, 1 );
 						moveCamera();
 						animateCamera();
-						strike();
 						physics_stats.update();
 					}
 				);
@@ -203,6 +202,10 @@
 
 					createBall();
 
+					ritira();
+					
+					homee();
+
 				(function() {
 
 					var impulseScalar = 50;
@@ -260,6 +263,7 @@
 							var intersects = getIntersectFromMouse(event, retry);
 							var intersects1 = getIntersectFromMouse(event, home);
 							if (intersects[0]){
+								sound_cammino.pause();
 								retryy();
 							}
 							if (intersects1[0]){
@@ -350,14 +354,10 @@
 			function moveCamera(){
 				if(k){
 					camera.position.z=ball.position.z+750;
+					retry.position.z=ball.position.z-750;
+					home.position.z=ball.position.z-750;
 				}
-			}
-
-			function strike(){
-				if(s){
-					ritira();
-					homee();
-				}
+				
 			}
 
 			function ritira(){
@@ -373,9 +373,9 @@
 						var material = new THREE.MeshNormalMaterial();
 						retry = new THREE.Mesh( geometry, material );
 
-						retry.position.x=875;
+						retry.position.x=675;
 						retry.position.y=480;
-						retry.position.z=-1600;
+						retry.position.z=0;
 					
 						scene.add(retry);
 					});
@@ -394,9 +394,9 @@
 						var material = new THREE.MeshNormalMaterial();
 						home = new THREE.Mesh( geometry, material );
 
-						home.position.x=875;
+						home.position.x=675;
 						home.position.y=400;
-						home.position.z=-1600;
+						home.position.z=0;
 					
 						scene.add(home);
 					});
@@ -488,10 +488,7 @@
 					scene.remove(boxes[i]);
 				}
 				boxes=[];
-				
 				scene.remove(ball);
-				scene.remove(retry);
-				scene.remove(home);
 				createBall();
 				createBoxes();
 				tiro=true;
