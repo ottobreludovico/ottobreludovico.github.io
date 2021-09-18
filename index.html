@@ -6,11 +6,15 @@
         <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<link type="text/css" rel="stylesheet" href="css/index.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.0/jquery.fancybox.min.css" rel="stylesheet" />
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+		<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
 		<script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
 		<script src="build/three.min.js"></script>
-		<script src="OrbitControl.js"></script>
-		<script type="text/javascript" src="/physi.js"></script>
-		<script type="text/javascript" src="/stats.js"></script>
+		<script type="text/javascript" src="physi.js"></script>
+		<script type="text/javascript" src="stats.js"></script>
 		<script src="js/index.js" type="module"></script>	
 	</head>
 	<body style="background-image: url(textures/home.jpg); background-repeat: repeat; background-size: cover; ">
@@ -32,7 +36,7 @@
 			</div>
 
 			<div id="info" style="position: absolute; top: 50%; left: 13%">
-				<span id = "instruction" class='start-btn' style = "width: 200px; height: 40px"><a style = "color:rgb(245, 245, 245);" href="textures/commands.png";>Commands</a></span>
+				<span id = "instruction" class='start-btn' style = "width: 200px; height: 40px"><a data-fancybox="gallery" style = "color:rgb(245, 245, 245);" href="textures/commands.png";>Commands</a></span>
 			</div>
 
 			<!-- The Modal -->
@@ -58,14 +62,25 @@
 	
 			'use strict';
 			
-			Physijs.scripts.worker = '/physijs_worker.js';
-			Physijs.scripts.ammo = '/ammo.js';
+			Physijs.scripts.worker = 'physijs_worker.js';
+			Physijs.scripts.ammo = 'ammo.js';
 			
 			var controls, container, initScene, render, applyForce, setMousePosition, mouse_position, ground_material, box_material, loader,
 			renderer, render_stats, physics_stats, scene, ground, light, camera, box, boxes = [], ball,k=false, s=false, count, sound_app, sound_cammino, sound_tiro, sound_strike;
 			var tiro=true;
 			var retry;
 			var home;
+			var obstacle=[];
+			var aspect;
+			var game3=false;
+
+			var tex1=new THREE.TextureLoader().load('textures/ball1.png');
+			var tex2=new THREE.TextureLoader().load('textures/ball2.jpg');
+			var tex3=new THREE.TextureLoader().load('textures/ball3.jpg');
+
+			var l1, l2, l3, l4, l5, l6;
+
+			var ball1,ball2,ball3,ball4;
 	
 			function initScene() {
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -101,17 +116,15 @@
 				);
 				count=0;
 
-				var aspect = window.innerWidth / window.innerHeight;
+				aspect = window.innerWidth / window.innerHeight;
 				
-				//camera = new THREE.OrthographicCamera( - d * aspect, d * aspect, d, - d, 1, 2500 );
-				camera = new THREE.PerspectiveCamera( 50, aspect, 1, 3000 );
-				//var camera = new THREE.OrthographicCamera( 1000 / -2, 1000 / 2, 800 / 2, 800 / -2, 1, 1000 );
+
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 3000 );
+			
 				camera.position.set( 0, 250, -200 );
 				camera.lookAt( new THREE.Vector3(0,0,-100) ); // or the origin
 				scene.add(camera);
 
-				//controls = new THREE.OrbitControls(camera);
-				//controls.noKeys = true;
 				
 				// Light
 				scene.add( new THREE.AmbientLight( 0x666666 ) );
@@ -159,8 +172,6 @@
 					scene.add(plane);
 					
 
-
-
 					var makeBorder = function(x, z, w, h)  {
 						var border = new Physijs.BoxMesh(
 						new THREE.CubeGeometry(w, 100, h),
@@ -189,6 +200,7 @@
 						return border;
 					};
 
+
 					scene.add(makeBorder(0, -1000, 400, 10));
 					//scene.add(makeBorder(0, 1000, 400, 10));
 					scene.add(makeBorder(200, 0, 10, 2000));
@@ -206,12 +218,24 @@
 					
 					homee();
 
+					level1();
+
+					level2();
+
+					level3();
+
+					level4();
+
+					level5();
+
+					level6();
+
+					createBalls();
+
 				(function() {
 
-					var impulseScalar = 50;
+					var impulseScalar = 70;
 
-					//var $container = app.container;
-					//var ball = app.ball;
 					var raycaster = new THREE.Raycaster();
 
 					var mouse = new THREE.Vector2();
@@ -226,9 +250,6 @@
 					powerLine.visible = false;
 					scene.add(powerLine);
 
-					//var START_EVENT = Modernizr.touch ? 'touchstart' : 'mousedown';
-					//var MOVE_EVENT = Modernizr.touch ? 'touchmove' : 'mousemove';
-					//var END_EVENT = Modernizr.touch ? 'touchend' : 'mouseup';
 
 
 					var changePowerLine = function() {
@@ -253,22 +274,77 @@
 						if(tiro){
 							var intersects = getIntersectFromMouse(event, ball);
 							if (intersects[0]) {
-								//orbitControls.enabled = false;
 								renderer.domElement.addEventListener( 'mousemove', mouseMoveHandler );
-								//container.on('mousemove', mouseMoveHandler);
 								renderer.domElement.addEventListener( 'mouseup', mouseUpHandler );
-								//container.on('mouseup', mouseUpHandler);
 							}
-						}else{
-							var intersects = getIntersectFromMouse(event, retry);
-							var intersects1 = getIntersectFromMouse(event, home);
-							if (intersects[0]){
+						}
+						var intersects = getIntersectFromMouse(event, retry);
+						var intersects1 = getIntersectFromMouse(event, home);
+						var intersectsl1 = getIntersectFromMouse(event, l1);
+						var intersectsl2 = getIntersectFromMouse(event, l2);
+						var intersectsl3 = getIntersectFromMouse(event, l3);
+						var intersectsl4 = getIntersectFromMouse(event, l4);
+						var intersectsl5 = getIntersectFromMouse(event, l5);
+						var intersectsl6 = getIntersectFromMouse(event, l6);
+						var intersectsb1 = getIntersectFromMouse(event, ball1);
+						var intersectsb2 = getIntersectFromMouse(event, ball2);
+						var intersectsb3 = getIntersectFromMouse(event, ball3);
+
+						if (intersects[0]){
+							if(sound_cammino){
 								sound_cammino.pause();
-								retryy();
 							}
-							if (intersects1[0]){
-								location.reload();
-							}
+							retryy();
+						}
+						if (intersects1[0]){
+							location.reload();
+						}
+						if (intersectsl1[0]){
+							clearObstacles();
+							createObstacle(50,100,50,30);
+						}
+						if (intersectsl2[0]){
+							clearObstacles();
+							createObstacle(50,100,50,30);
+							createObstacle(-50,-250,50,30);
+						}
+						if (intersectsl3[0]){
+							clearObstacles();
+							createObstacle(-100,200,50,30);
+							createObstacle(-50,100,50,30);
+							createObstacle(0,0,50,30);
+							createObstacle(50,-100,50,30);
+							createObstacle(100,-200,50,30);
+						}
+						if (intersectsl4[0]){
+							clearObstacles();
+							createObstacle(-20,100,50,30);
+							createObstacle(0,30,50,30);
+							createObstacle(20,-50,50,30);
+						}
+						if (intersectsl5[0]){
+							clearObstacles();
+							createObstacle(30,-300,50,30);
+							createObstacle(0,-200,50,30);
+							createObstacle(-30,-100,50,30);
+							createObstacle(-30,0,50,30);
+							createObstacle(0,100,50,30);
+							createObstacle(30,200,50,30);
+						}
+						if (intersectsl6[0]){
+							clearObstacles();
+							createObstacle(50,-50,50,30);
+							createObstacle(-50,100,50,30);
+							createObstacle(0,-200,50,30);
+						}
+						if (intersectsb1[0]){
+							ball.material.map=tex1;
+						}
+						if (intersectsb2[0]){
+							ball.material.map=tex2;
+						}
+						if (intersectsb3[0]){
+							ball.material.map=tex3;
 						}
 					};
 
@@ -286,12 +362,22 @@
 
 					var mouseUpHandler = function(event) {
 						if(tiro){
-							//container.off('mousemove', mouseMoveHandler);
+							scene.remove(ball1);
+							scene.remove(ball2);
+							scene.remove(ball3);
+							scene.remove(ball4);
+							scene.remove(l1);
+							scene.remove(l2);
+							scene.remove(l3);
+							scene.remove(l4);
+							scene.remove(l5);
+							scene.remove(l6);
+					
 							renderer.domElement.removeEventListener( 'mousemove', mouseMoveHandler );
-							//container.off('mouseup', mouseUpHandler);
+					
 							renderer.domElement.removeEventListener( 'mouseup', mouseUpHandler );
 							powerLine.visible = false;
-							//orbitControls.enabled = true;
+				
 							k=true;
 							tiro=false
 							tiro_Sound();
@@ -302,7 +388,7 @@
 						}
 					};
 
-					//container.on('mousedown', mouseDownHandler);
+
 					renderer.domElement.addEventListener( 'mousedown', mouseDownHandler );
 					
 
@@ -316,8 +402,6 @@
 
 					})();
 				
-				//renderer.domElement.addEventListener( 'mousemove', setMousePosition );
-				//renderer.domElement.addEventListener( 'mousedown', onclick );
 
 				requestAnimationFrame( render );
 				scene.simulate();
@@ -354,8 +438,12 @@
 			function moveCamera(){
 				if(k){
 					camera.position.z=ball.position.z+750;
-					retry.position.z=ball.position.z-750;
-					home.position.z=ball.position.z-750;
+					retry.position.z=ball.position.z-550;
+					home.position.z=ball.position.z-550;
+					if(ball.position.z>1000){
+						sound_cammino.pause();
+						retryy();
+					}
 				}
 				
 			}
@@ -375,7 +463,7 @@
 
 						retry.position.x=675;
 						retry.position.y=480;
-						retry.position.z=0;
+						retry.position.z=200;
 					
 						scene.add(retry);
 					});
@@ -396,7 +484,7 @@
 
 						home.position.x=675;
 						home.position.y=400;
-						home.position.z=0;
+						home.position.z=200;
 					
 						scene.add(home);
 					});
@@ -429,9 +517,9 @@
 			    audioLoader.load('sounds/applausi.mp3', function(buffer) {
 			        sound_app.setBuffer(buffer);
 			        sound_app.setVolume(0.4);
-			        sound_app.setLoop( false );
+			        sound_app.setLoop( true );
 			        sound_app.play();
-			        });    
+			        });
 			}
 
 			function cammino_Sound(){
@@ -491,7 +579,22 @@
 				scene.remove(ball);
 				createBall();
 				createBoxes();
+				level1();
+				level2();
+				level3();
+				level4();
+				level5();
+				level6();
+				createBalls();
+				clearObstacles();
 				tiro=true;
+			}
+
+			function clearObstacles(){
+				for(var i = 0; i < obstacle.length ; i++) {
+					scene.remove(obstacle[i]);
+				}
+				obstacle=[];
 			}
 
 			function createBoxes(){
@@ -527,7 +630,6 @@
 						var box = new Physijs.BoxMesh(boxGeometry, faceMaterial, 10);
 						box.castShadow = true;
 						box.receiveShadow = true;
-						//box.position.set(0,boxHeight*i+(boxHeight/2), 0);
 						boxes.push(box);
 					};
 
@@ -538,28 +640,34 @@
 					boxes[4].position.set(15 + offsetX,boxHeight/2+boxHeight,offsetZ);
 					boxes[5].position.set(0 + offsetX,boxHeight/2+(2*boxHeight),offsetZ);
 
-					boxes[0].addEventListener('collision', function(object){
-						//console.log(object);
-						if(object.name=="ball"){
-							if(s==false){
-								s=true;
-								sound_cammino.pause();
-								strikeSound();
-								strike_Sound();
+					for(var i = 0; i < numberOfBoxes; i++) {
+						boxes[i].addEventListener('collision', function(object){
+							if(object.name=="ball"){
+								if(s==false){
+									s=true;
+									sound_cammino.pause();
+									strikeSound();
+									strike_Sound();
+									setTimeout(f, 3500);    
+								}
 							}
-						}
-					});
-
+						});
+					};
+					
 					boxes.forEach(function(box){
 						//console.log(box.rotation);
 						scene.add(box);
 					});
 			}
 
+			function f(){
+				sound_app.pause(); 
+			}
+
 			function createBall(){
 				var ballGeo = new THREE.SphereGeometry(15, 24, 24);
-				var tex=new THREE.TextureLoader().load('textures/ball1.png');
-				var ballMat = Physijs.createMaterial(new THREE.MeshBasicMaterial({side: THREE.FrontSide, map: tex}), 1, 1);
+				
+				var ballMat = Physijs.createMaterial(new THREE.MeshBasicMaterial({side: THREE.FrontSide, map: tex1}), 1, 1);
 				ball = new Physijs.SphereMesh(
 				ballGeo,
 				ballMat,
@@ -574,13 +682,249 @@
 				scene.add(ball);
 			}
 
+			function createBalls(){
+				var loader = new THREE.FontLoader();
+					loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
+							var geometry = new THREE.TextGeometry( "Select your ball", {
+								font: font,
+								size: 30,
+								height: 20,
+								bevelSize: 8,
+								curveSegments: 12
+							});
+						var material = new THREE.MeshNormalMaterial();
+						ball4 = new THREE.Mesh( geometry, material );
+
+						ball4.position.x=670;
+						ball4.position.y=-150;
+						ball4.position.z=200;
+					
+						scene.add(ball4);
+				});
+
+				var ballGeo = new THREE.SphereGeometry(25, 24, 24);
+
+				
+				var ballMat1 = Physijs.createMaterial(new THREE.MeshBasicMaterial({side: THREE.FrontSide, map: tex1}), 1, 1);
+				ball1 = new Physijs.SphereMesh(
+				ballGeo,
+				ballMat1,
+				0
+				);
+
+				ball1.position.set(725, -220, 200);
+				ball1.setLinearFactor(new THREE.Vector3( 0, 0, 0 )); // only move on X and Z axis
+				ball1.castShadow = true;
+				ball1.receiveShadow = true;
+				ball1.name="ball";
+
+
+				var ballMat2 = Physijs.createMaterial(new THREE.MeshBasicMaterial({side: THREE.FrontSide, map: tex2}), 1, 1);
+				ball2 = new Physijs.SphereMesh(
+				ballGeo,
+				ballMat2,
+				0
+				);
+
+				ball2.position.set(825, -220, 200);
+				ball2.setLinearFactor(new THREE.Vector3( 0, 0, 0 )); // only move on X and Z axis
+				ball2.castShadow = true;
+				ball2.receiveShadow = true;
+				ball2.name="ball";
+
+
+				
+				var ballMat3 = Physijs.createMaterial(new THREE.MeshBasicMaterial({side: THREE.FrontSide, map: tex3}), 1, 1);
+				ball3 = new Physijs.SphereMesh(
+				ballGeo,
+				ballMat3,
+				0
+				);
+
+				ball3.position.set(925, -220, 200);
+				ball3.setLinearFactor(new THREE.Vector3( 0, 0, 0 )); // only move on X and Z axis
+				ball3.castShadow = true;
+				ball3.receiveShadow = true;
+				ball3.name="ball";
+
+
+				scene.add(ball1);
+				scene.add(ball2);
+				scene.add(ball3);
+				
+			}
+
+			function createObstacle(x, z, w, h)  {
+				var texture = new THREE.TextureLoader().load('textures/bowl.png');
+				var border = new Physijs.BoxMesh(
+				new THREE.CubeGeometry(w, 100, h),
+				Physijs.createMaterial(
+					new THREE.MeshBasicMaterial({color: 0x664c06, map: texture} ), 1, 1   
+				),
+				0 
+				);
+				border.position.set(x, 50, z);
+				border.visible = true;
+
+				border.addEventListener('collision', function(object){
+					if(object.name=="ball"){
+						sound_cammino.pause();
+						retryy();
+					}
+				});
+
+				scene.add(border);
+				obstacle.push(border);
+			};
+
+			
+
+			function level1(){
+				var loader = new THREE.FontLoader();
+					loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
+							var geometry = new THREE.TextGeometry( "Level1", {
+								font: font,
+								size: 60,
+								height: 60,
+								bevelSize: 8,
+								curveSegments: 12
+							});
+						var material = new THREE.MeshNormalMaterial();
+						l1 = new THREE.Mesh( geometry, material );
+
+						l1.position.x=-675;
+						l1.position.y=600;
+						l1.position.z=200;
+					
+						scene.add(l1);
+					});
+			}
+
+			function level2(){
+				var loader = new THREE.FontLoader();
+					loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
+							var geometry = new THREE.TextGeometry( "Level2", {
+								font: font,
+								size: 60,
+								height: 60,
+								bevelSize: 8,
+								curveSegments: 12
+							});
+						var material = new THREE.MeshNormalMaterial();
+						l2 = new THREE.Mesh( geometry, material );
+
+						l2.position.x=-675;
+						l2.position.y=500;
+						l2.position.z=200;
+					
+						scene.add(l2);
+					});
+			}
+
+			function level3(){
+				var loader = new THREE.FontLoader();
+					loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
+							var geometry = new THREE.TextGeometry( "Level3", {
+								font: font,
+								size: 60,
+								height: 60,
+								bevelSize: 8,
+								curveSegments: 12
+							});
+						var material = new THREE.MeshNormalMaterial();
+						l3 = new THREE.Mesh( geometry, material );
+
+						l3.position.x=-675;
+						l3.position.y=400;
+						l3.position.z=200;
+					
+						scene.add(l3);
+					});
+			}
+
+			function level4(){
+				var loader = new THREE.FontLoader();
+					loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
+							var geometry = new THREE.TextGeometry( "Level4", {
+								font: font,
+								size: 60,
+								height: 60,
+								bevelSize: 8,
+								curveSegments: 12
+							});
+						var material = new THREE.MeshNormalMaterial();
+						l4 = new THREE.Mesh( geometry, material );
+
+						l4.position.x=-675;
+						l4.position.y=300;
+						l4.position.z=200;
+					
+						scene.add(l4);
+					});
+			}
+
+			function level5(){
+				var loader = new THREE.FontLoader();
+					loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
+							var geometry = new THREE.TextGeometry( "Level5", {
+								font: font,
+								size: 60,
+								height: 60,
+								bevelSize: 8,
+								curveSegments: 12
+							});
+						var material = new THREE.MeshNormalMaterial();
+						l5 = new THREE.Mesh( geometry, material );
+
+						l5.position.x=-675;
+						l5.position.y=200;
+						l5.position.z=200;
+					
+						scene.add(l5);
+					});
+			}
+
+			function level6(){
+				var loader = new THREE.FontLoader();
+					loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
+							var geometry = new THREE.TextGeometry( "Level6", {
+								font: font,
+								size: 60,
+								height: 60,
+								bevelSize: 8,
+								curveSegments: 12
+							});
+						var material = new THREE.MeshNormalMaterial();
+						l6 = new THREE.Mesh( geometry, material );
+
+						l6.position.x=-675;
+						l6.position.y=100;
+						l6.position.z=200;
+					
+						scene.add(l6);
+					});
+			}
+
+			function onWindowsResize(){
+				if(game3){
+					camera.aspect = window.innerWidth / window.innerHeight;
+					camera.updateProjectionMatrix();
+					renderer.setSize( window.innerWidth, window.innerHeight );
+				}
+			}
+			
+			window.addEventListener( 'resize', onWindowsResize, false );
+  
+			
+
 
 			document.getElementById("start3").addEventListener("click", function(){
 				document.getElementById("start2").style.display = "none";
 				document.getElementById("start").style.display = "none";
 				document.getElementById("start3").style.display = "none";
 				document.getElementById("prova").style.display = "none";
-				document.getElementById("instruction").style.display = "none";    
+				document.getElementById("instruction").style.display = "none";  
+				game3=true;  
 				initScene();
 			});
 

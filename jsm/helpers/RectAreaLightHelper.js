@@ -14,7 +14,7 @@ import {
 	LineBasicMaterial,
 	Mesh,
 	MeshBasicMaterial
-} from '../../../build/three.module.js';
+} from '../../build/three.module.js';
 
 function RectAreaLightHelper( light, color ) {
 

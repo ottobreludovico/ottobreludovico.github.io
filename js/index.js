@@ -5,8 +5,8 @@ import { GUI } from '../jsm/libs/dat.gui.module.js';
 
 var container;
 var camera, scene, renderer;
-var gun;
-var gun1;
+var gun=null;
+var gun1=null;
 var t=[];
 var tm=[];
 var sound_shot;
@@ -145,7 +145,7 @@ function createScene(){
 
     if(game1){
         var loader = new THREE.TextureLoader();
-        loader.load('/cloud2.jpg' , function(texture){
+        loader.load('cloud2.jpg' , function(texture){
         scene.background = texture;  
     });
     }
@@ -347,7 +347,7 @@ function createStar(x,y){
 
 var planets;
 
-var earth,jupiter,mars,mercury,neptune,pluto,saturn,uranus,venus;
+var earth=null,jupiter=null,mars=null,mercury=null,neptune=null,pluto=null,saturn=null,uranus=null,venus=null;
 
 function createPlanets(){
     var mtlloader1=new MTLLoader();
@@ -471,11 +471,15 @@ function createGround(){
 function onMouseMove(evt) {
     evt.preventDefault();
     if(game1){
-        gun.rotation.y=(window.innerWidth/2-evt.clientX)/1500;
-        gun.rotation.x=0.002+(window.innerHeight/2-evt.clientY)/1000;
+        if(gun){
+            gun.rotation.y=(window.innerWidth/2-evt.clientX)/1500;
+            gun.rotation.x=0.002+(window.innerHeight/2-evt.clientY)/1000;
+        }
     }else if(game2){
-        gun1.rotation.y=4.7+(window.innerWidth/2-evt.clientX)/1500;
-        gun1.rotation.x=(window.innerHeight/2-evt.clientY)/1000;
+        if(gun1){
+            gun1.rotation.y=4.7+(window.innerWidth/2-evt.clientX)/1500;
+            gun1.rotation.x=(window.innerHeight/2-evt.clientY)/1000;
+        }
     }
 }
 
@@ -1062,41 +1066,60 @@ function animate( now ) {
     
 
     if(game2){
-        earth.rotation.y+=0.001;
-        earth.rotation.x-=0.001;
-        earth.rotation.z+=0.001;
-
-        jupiter.rotation.y-=0.001;
-        jupiter.rotation.x+=0.001;
-        jupiter.rotation.z+=0.001;
-
-        mars.rotation.y-=0.001;
-        mars.rotation.x+=0.001;
-        mars.rotation.z-=0.001;
-
-        mercury.rotation.y-=0.001;
-        mercury.rotation.x+=0.001;
-        mercury.rotation.z+=0.001;
-
-        neptune.rotation.y-=0.001;
-        neptune.rotation.x+=0.001;
-        neptune.rotation.z+=0.001;
-
-        pluto.rotation.y-=0.001;
-        pluto.rotation.x+=0.001;
-        pluto.rotation.z+=0.001;
-
-        saturn.rotation.y-=0.001;
-        saturn.rotation.x-=0.001;
-        saturn.rotation.z-=0.001;
-
-        uranus.rotation.y+=0.001;
-        uranus.rotation.x-=0.001;
-        uranus.rotation.z+=0.001;
-
-        venus.rotation.y-=0.001;
-        venus.rotation.x+=0.001;
-        venus.rotation.z-=0.001;
+        if(earth){
+            earth.rotation.y+=0.001;
+            earth.rotation.x-=0.001;
+            earth.rotation.z+=0.001;
+        }
+       
+        if(jupiter){
+            jupiter.rotation.y-=0.001;
+            jupiter.rotation.x+=0.001;
+            jupiter.rotation.z+=0.001;
+        }
+       
+        if(mars){
+            mars.rotation.y-=0.001;
+            mars.rotation.x+=0.001;
+            mars.rotation.z-=0.001;
+        }
+        
+        if(mercury){
+            mercury.rotation.y-=0.001;
+            mercury.rotation.x+=0.001;
+            mercury.rotation.z+=0.001;
+        }
+        
+        if(neptune){
+            neptune.rotation.y-=0.001;
+            neptune.rotation.x+=0.001;
+            neptune.rotation.z+=0.001;
+        }
+        
+        if(pluto){
+            pluto.rotation.y-=0.001;
+            pluto.rotation.x+=0.001;
+            pluto.rotation.z+=0.001;
+        }
+       
+        if(saturn){
+            saturn.rotation.y-=0.001;
+            saturn.rotation.x-=0.001;
+            saturn.rotation.z-=0.001;
+        }
+        
+        if(uranus){
+            uranus.rotation.y+=0.001;
+            uranus.rotation.x-=0.001;
+            uranus.rotation.z+=0.001;
+        }
+      
+        if(venus){
+            venus.rotation.y-=0.001;
+            venus.rotation.x+=0.001;
+            venus.rotation.z-=0.001;
+        }
+       
 
         stars.forEach(e => {
             e.star.rotation.y+=0.1;
@@ -1135,6 +1158,9 @@ document.body.onkeyup = function(e){
     if(e.keyCode == 72){
     	location.reload(true);
     }
+    else if(e.keyCode == 27){
+        location.reload(true);
+    }
 }
 
 
@@ -1148,6 +1174,7 @@ document.getElementById("start").addEventListener("click", function(){
     document.getElementById("prova1").style.display = "block";
     document.getElementById("instruction").style.display = "none";    
     game1=true;
+    game2=false;
     init();
     animate();
 });
@@ -1161,6 +1188,7 @@ document.getElementById("start2").addEventListener("click", function(){
     document.getElementById("score").style.color = "white";
     document.getElementById("instruction").style.display = "none";    
     game2=true;
+    game1=false;
     init2();
     animate();
 });

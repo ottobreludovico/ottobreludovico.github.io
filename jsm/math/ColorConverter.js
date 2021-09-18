@@ -5,7 +5,7 @@
 
 import {
 	MathUtils
-} from "../../../build/three.module.js";
+} from "../../build/three.module.js";
 
 var ColorConverter = {
 
